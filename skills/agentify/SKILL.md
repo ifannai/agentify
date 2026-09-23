@@ -27,19 +27,21 @@ Understand the repository before proposing context files. Do not redesign applic
 
 Routing files are signposts, not encyclopedias. Keep always-loaded context small and use pointers.
 
-Preferred path:
+Preferred project-operating path:
 
 ```text
 AGENTS.md
   ↓
-current-work source, when relevant
+STATE.md
   ↓
 relevant subsystem CONTEXT.md
   ↓
 specific source + tests
+
+ROADMAP.md = human-visible plan and progress
 ```
 
-Not every repository needs every layer.
+Use this model by default for repositories that do not already have an equivalent authoritative operating system. Do not duplicate an existing issue/PR/project-board workflow merely to introduce these filenames.
 
 ## Subject first, type second
 
@@ -87,9 +89,19 @@ Stable architecture, invariants, dependency boundaries, security constraints, va
 
 ## Current
 
-Active task, scope, blockers, acceptance criteria, immediate backlog. This may live in `STATE.md`, issues, PRs, project boards, task files, or another authoritative system.
+Active task, scope, blockers, acceptance criteria, immediate backlog, and the exact handoff point for the next coding shift.
 
-Do not create duplicate current-state systems.
+By default, Agentify uses `STATE.md` as the repository-local shift handoff. If the repository already has a clearly authoritative equivalent (for example an issue/PR workflow that reliably carries the same handoff information), preserve that system instead of duplicating it.
+
+`STATE.md` is operational, not historical. It should be rewritten as work advances rather than accumulating a diary.
+
+## Planned
+
+Human-visible intended work, milestones, sequencing, and progress belong in `ROADMAP.md`.
+
+Use checkable items (`[ ]` / `[x]`) for concrete milestones so the human can see and control progress. The roadmap may be revised by the human; agents should not silently redefine project direction.
+
+Do not mix current-shift handoff into the roadmap or turn `STATE.md` into a long-term plan.
 
 ## Historical
 
@@ -210,9 +222,23 @@ If the routing table itself becomes large, introduce a dedicated root `CONTEXT.m
 
 Can the agent explain what each major area owns and what belongs elsewhere? Look for unclear or accidental cross-boundary imports.
 
-### Current state
+### Project operation and current state
 
-Can the next agent determine what is active and what comes next? Reuse existing issues, PRs, boards, task files, plans, or state files. Do not recommend `STATE.md` by default.
+Can both the human and the next agent tell:
+
+- what the project is working toward;
+- which roadmap items are complete or pending;
+- what the current shift is doing;
+- where the previous shift stopped;
+- what remains to validate?
+
+Prefer the Agentify operating model when no equivalent authoritative system exists:
+
+- `ROADMAP.md` — human-visible phased plan with checkable milestones;
+- `STATE.md` — current shift/handoff only;
+- `AGENTS.md` — routing into those sources and the relevant subsystem.
+
+If an existing issue/PR/project system already provides these roles reliably, preserve it rather than creating duplicate truth.
 
 ### Validation
 
@@ -299,13 +325,52 @@ Useful sections:
 
 Prefer pointers over copied explanations.
 
-## Current work
+## STATE.md and shifts
 
-Reuse the existing authoritative system. Create `STATE.md` only when active work otherwise lacks a durable handoff source and the user approves it.
+Use `STATE.md` by default when the repository does not already have an equivalent authoritative shift-handoff mechanism.
+
+Keep it concise and rewrite it at the end of each meaningful coding shift. A useful structure is:
+
+- **Current Phase**
+- **Last Validated State**
+- **Blockers**
+- **Active Task**
+  - Task
+  - Scope
+  - Target Files
+  - Test
+  - Acceptance Criteria
+- **Immediate Backlog**
+
+At shift start:
+
+1. read `AGENTS.md`;
+2. read `STATE.md`;
+3. consult the relevant local context/source only;
+4. confirm the active task still matches the roadmap.
+
+At shift end:
+
+1. validate the work;
+2. update completed `ROADMAP.md` checkboxes when warranted;
+3. rewrite `STATE.md` to the exact validated handoff point;
+4. record blockers and the next smallest actionable step.
+
+Do not use `STATE.md` as a chronological diary.
 
 ## ROADMAP.md
 
-Do not add by default. Use only when the repository genuinely benefits from a durable phased plan.
+Use `ROADMAP.md` by default when the repository does not already have an equivalent human-visible project plan.
+
+The roadmap belongs primarily to the human. It should:
+
+- describe phases or meaningful milestones;
+- use checkable items for concrete work;
+- distinguish completed from pending work;
+- remain higher-level than `STATE.md`;
+- avoid implementation transcripts and temporary debugging detail.
+
+Agents may mark work complete only after the relevant acceptance/validation condition is satisfied. Do not silently invent, reorder, or remove human priorities merely to make the roadmap cleaner.
 
 ## README
 
@@ -323,6 +388,9 @@ Check for:
 - routes pointing to moved responsibilities;
 - root context duplicating local context;
 - obsolete current-work state;
+- `STATE.md` accumulating history instead of serving as a current handoff;
+- roadmap checkboxes that disagree with validated implementation state;
+- roadmap and state describing conflicting active phases;
 - historical plans mistaken for current requirements;
 - new subjects with no route;
 - changed invariants;
@@ -376,4 +444,4 @@ Report what was and was not run.
 
 # Success criterion
 
-A repository is sufficiently agent-ready when a capable coding agent can start from a small canonical entry file, follow explicit pointers to the relevant subject, load only local rules and necessary implementation evidence, respect critical invariants, and validate the result without reconstructing the whole repository.
+A repository is sufficiently agent-ready when the human can see and control project progress through a clear roadmap, a new coding shift can recover the exact handoff from current state, and a capable agent can start from a small canonical entry file, follow explicit pointers to the relevant subject, load only local rules and necessary implementation evidence, respect critical invariants, and validate the result without reconstructing the whole repository.

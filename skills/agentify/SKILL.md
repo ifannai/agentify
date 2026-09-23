@@ -164,9 +164,21 @@ Historical context should be consulted only when necessary.
 
 # Progressive inspection
 
-Do not recursively read the entire repository merely for completeness.
-
 Inspect progressively.
+
+Once this skill has been loaded, do not read `SKILL.md` from disk again unless the user explicitly asks to inspect or debug the skill itself.
+
+Prefer low-cost structural evidence before source contents:
+
+- file and directory names;
+- package/build configuration;
+- imports and dependency relationships;
+- targeted searches;
+- representative files.
+
+Do not dump broad directories or large groups of source files into context merely for completeness.
+
+Do not recursively read the entire repository merely for completeness.
 
 Start with:
 
@@ -180,11 +192,21 @@ Start with:
 
 Form an initial architecture hypothesis before opening broad source areas.
 
+Before substantially expanding inspection, identify the specific unanswered question that requires more context.
+
+Do not broaden repository reading without a concrete hypothesis to confirm or reject.
+
 Then inspect only the files necessary to confirm or reject that hypothesis.
 
 Expand into additional source areas only when needed.
 
 Prefer representative files over exhaustive reading.
+
+Do not inspect Git history by default.
+
+Use commits, file-touch frequency, PR history, or blame only when the current working tree cannot answer a relevant audit question, or when testing a specific hypothesis such as repeated churn, ownership ambiguity, or concentrated merge conflicts.
+
+Historical evidence should answer a specific question, not serve as general repository context.
 
 Examples:
 
@@ -195,7 +217,19 @@ Examples:
 
 The goal is to understand the repository sufficiently to route future work, not to memorize the repository.
 
----
+#### Audit context budget
+
+Treat context consumption as part of the audit's own quality.
+
+A repository audit intended to reduce agent context cost should itself avoid unnecessary context consumption.
+
+Prefer:
+
+structure → hypothesis → targeted evidence → conclusion
+
+over:
+
+broad reading → accumulated context → conclusion
 
 # Audit mode
 
@@ -220,6 +254,17 @@ Examine enough of the repository to understand:
 - security-sensitive boundaries;
 - major dependency directions;
 - current-task tracking if present.
+
+During audit, identify available validation commands but do not automatically run the complete validation suite.
+
+Run validation during audit only when:
+
+- the user asks for it;
+- current repository health is relevant to an audit finding;
+- documentation claims cannot otherwise be verified;
+- a lightweight check is needed to establish the baseline.
+
+Full validation is normally required after `adapt` or approved maintenance changes.
 
 ## Assess
 

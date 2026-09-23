@@ -76,15 +76,21 @@ For each meaningful `Watch` or `Problem`, include evidence, agent impact, and th
 
 ## Adapt
 
-Apply only an approved audit/plan. Prefer the smallest context system that solves demonstrated problems.
+Apply only an approved audit/plan.
 
 Load:
 - `routing-patterns.md`
 - `operating-model.md`
 
-Create or update only the context files justified by the audit.
+The default repository-local operating model is `AGENTS.md` + `STATE.md` + `ROADMAP.md`. Treat this as the baseline operating structure, not as optional documentation to omit because the repository is small.
 
-Do not duplicate an existing authoritative issue/PR/project workflow.
+Use local `CONTEXT.md` files only when demonstrated subsystem complexity justifies them.
+
+Do not treat arbitrary existing files such as `features.md`, `TODO.md`, notes, or vendor-specific planning files as equivalent substitutes for `STATE.md` + `ROADMAP.md`.
+
+Preserve another operating system only when the human explicitly chose it as authoritative or when a clearly established external issue/PR/project workflow already provides both planning and handoff roles.
+
+When migrating to the default model, move useful legacy planning/handoff content into `STATE.md` and `ROADMAP.md`, update routes, and remove or deprecate the superseded file when safe.
 
 ## Maintain
 

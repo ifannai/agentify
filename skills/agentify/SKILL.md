@@ -1,382 +1,379 @@
 ---
 name: agentify
-description: Audit, adapt, and maintain software repositories for safe, efficient coding-agent work. Use when asked to make a repository agent-friendly, improve coding-agent context, create or review AGENTS.md, STATE.md, ROADMAP.md, or CONTEXT.md files, audit repository structure for coding agents, reduce agent context cost, clarify architectural boundaries, or check whether agent-facing documentation has drifted from the codebase.
----
-
+description: Audit, adapt, and maintain software repositories for safe, efficient, agent-agnostic coding-agent work. Use when asked to make a repository agent-friendly, reduce agent context cost, create or review AGENTS.md or CONTEXT.md routing, clarify architectural boundaries, establish current-work context, or check whether agent-facing context has drifted from the codebase.
 ---
 
 # Agentify
 
-Adapt existing software repositories so coding agents can work safely with minimal relevant context and clear architectural boundaries.
+Adapt repositories so coding agents can make safe, narrow changes without reconstructing the whole codebase.
 
-The objective is not to generate documentation for its own sake.
-
-The objective is to reduce the amount of unrelated repository context an agent must consume before making a safe, narrow change.
-
-An agent entering the repository should be able to answer cheaply:
+A new agent should be able to answer cheaply:
 
 1. What am I doing?
 2. Where does this change belong?
 3. What must I not break?
-4. How do I know I am finished?
-5. What should I read, and what should I explicitly not read?
+4. What context do I load next?
+5. How do I verify completion?
 
-The preferred context path is:
+Agentify is agent-agnostic. Treat `AGENTS.md` as the canonical agent entry point. Do not create or depend on vendor-specific instruction files unless the user explicitly asks for them.
+
+# Principles
+
+## Adapt context to the architecture
+
+Understand the repository before proposing context files. Do not redesign application architecture merely to improve agent documentation. Architectural refactoring requires human approval.
+
+## Route; do not preload
+
+Routing files are signposts, not encyclopedias. Keep always-loaded context small and use pointers.
+
+Preferred path:
 
 ```text
 AGENTS.md
-    ↓
-STATE.md or existing current-task source
-    ↓
+  ↓
+current-work source, when relevant
+  ↓
 relevant subsystem CONTEXT.md
-    ↓
-minimal relevant source files
-    ↓
-minimal relevant tests
+  ↓
+specific source + tests
 ```
 
 Not every repository needs every layer.
 
----
+## Subject first, type second
 
-# Core principle
+Place durable context close to the subject it governs:
 
-Adapt agent context to the existing architecture first.
+```text
+src/domain/CONTEXT.md
+src/data/CONTEXT.md
+infra/CONTEXT.md
+```
 
-Do not redesign application architecture merely to produce cleaner agent documentation.
+Prefer this over a generic bucket of unrelated context files. Central references are for genuinely cross-cutting knowledge.
 
-Agentification may reveal architectural problems, but architectural refactoring requires human approval.
+## Load by need, not folder depth
 
----
+Use this mental model:
+
+- Layer 0 — entry: `AGENTS.md`; identity, global rules, high-level routing.
+- Layer 1 — router/current work: optional source loaded after intent is known.
+- Layer 2 — local contract: subsystem `CONTEXT.md`.
+- Layer 3 — reference: stable detail loaded only when the local contract points to it.
+- Layer 4 — working artifacts: task-specific outputs, diffs, logs, evidence.
+
+Start small. Add layers only when real complexity requires them.
+
+## Scripts automate; agents reason
+
+Prefer deterministic tools for formatting, linting, type checks, schema checks, generation, migrations, and import-boundary checks. Use the model for judgment, ambiguity, architecture interpretation, and change planning.
 
 # Modes
 
-The skill has three modes:
+- `audit` — read-only assessment.
+- `adapt` — apply an approved audit/plan.
+- `maintain` — human-invoked drift review.
 
-- `audit`
-- `adapt`
-- `maintain`
+Natural-language requests such as “audit agent readiness” map to `audit`; “agentify this repo” maps to `adapt`; “check whether agent docs are stale” maps to `maintain`.
 
-## Mode selection
+If adaptation is requested without a previous audit or approved plan, perform `audit` first and stop for review. If intent is ambiguous and modification may be involved, default to `audit`.
 
-Interpret explicit mode names first.
+# Context types
 
-Natural-language requests map as follows.
+## Durable
 
-### Audit
+Stable architecture, invariants, dependency boundaries, security constraints, validation conventions, `AGENTS.md`, and local `CONTEXT.md`.
 
-Use `audit` for requests such as:
+## Current
 
-- audit this repo for coding agents;
-- review agent readiness;
-- is this repository agent-friendly?;
-- assess the repo structure;
-- identify context problems;
-- review AGENTS.md or subsystem boundaries;
-- tell me what should change before agents work here.
-
-### Adapt
-
-Use `adapt` for requests such as:
-
-- agentify this repository;
-- set this repo up for coding agents;
-- apply the approved audit;
-- create the agent-facing repository structure;
-- create or update AGENTS.md, STATE.md, ROADMAP.md, or CONTEXT.md based on the audit.
-
-If adaptation is requested but no previous audit or approved plan exists, perform `audit` first and stop for human review before modifying the repository.
-
-### Maintain
-
-Use `maintain` for requests such as:
-
-- check whether the agent docs are stale;
-- review agent-readiness after recent development;
-- check routing or context drift;
-- audit whether AGENTS.md or CONTEXT.md still match the code;
-- perform an agent-readiness maintenance review.
-
-Maintain mode is human-invoked.
-
-Do not autonomously enter maintain mode during unrelated implementation work.
-
-If the user's intent is ambiguous and modification may be involved, default to `audit`.
-
----
-
-# Context model
-
-Distinguish three forms of context.
-
-## Durable context
-
-Stable rules and architectural knowledge.
-
-Examples:
-
-- `AGENTS.md`
-- subsystem `CONTEXT.md`
-- architecture rules
-- invariants
-- dependency boundaries
-- security constraints
-- validation conventions
-
-## Current context
-
-Information about active work.
-
-Examples:
-
-- current task
-- active scope
-- expected files
-- blockers
-- acceptance criteria
-- immediate backlog
-
-This may live in:
-
-- `STATE.md`
-- an issue
-- a PR
-- a project-management file
-- another clearly authoritative system
+Active task, scope, blockers, acceptance criteria, immediate backlog. This may live in `STATE.md`, issues, PRs, project boards, task files, or another authoritative system.
 
 Do not create duplicate current-state systems.
 
-## Historical context
+## Historical
 
-Examples:
-
-- Git history
-- completed PRs
-- old issues
-- implementation diaries
-- past architectural discussions
-
-Agents should normally consume durable + current context first.
-
-Historical context should be consulted only when necessary.
-
----
+Git history, completed PRs, old issues, implementation diaries, superseded plans, and past design discussion. Consult history only to answer a specific unresolved question.
 
 # Progressive inspection
 
-Inspect progressively.
+Once this skill is loaded, do not reread `SKILL.md` from disk unless the user asks to inspect/debug the skill itself.
 
-Once this skill has been loaded, do not read `SKILL.md` from disk again unless the user explicitly asks to inspect or debug the skill itself.
+Preferred audit path:
 
-Prefer low-cost structural evidence before source contents:
+```text
+AGENTS.md if present
+  ↓
+fresh repository snapshot
+  ↓
+structure + configuration
+  ↓
+architecture hypothesis
+  ↓
+targeted evidence
+  ↓
+conclusion
+```
 
-- file and directory names;
-- package/build configuration;
-- imports and dependency relationships;
+## Repomix snapshot
+
+When Repomix is available, use it as the preferred structural snapshot in `audit` and `maintain`.
+
+1. Read root `AGENTS.md` first if present.
+2. Generate a fresh temporary Repomix snapshot of the current working tree.
+3. Inspect summary, directory structure, metrics, and compressed representations.
+4. Search the snapshot to test specific hypotheses.
+5. Read full source directly only for files needed to resolve an unanswered question.
+
+Never dump the entire Repomix output into model context merely because it exists.
+
+Never treat repository-tracked `repomix-output.*` as authoritative unless freshness against current HEAD and working tree is verified. If the user supplies a snapshot, use it as evidence but verify freshness before relying on current paths or behavior.
+
+Prefer temporary or ignored output. Typical CLI shape:
+
+```bash
+repomix . --compress --no-git-sort-by-changes \
+  --output "${TMPDIR:-/tmp}/agentify-repomix.xml"
+```
+
+Do not include Git logs or diffs by default. Add them only to test a specific hypothesis about churn, recent changes, ownership, or drift.
+
+If Repomix is unavailable, fall back to a repository tree, targeted search, and representative reads. Do not add a persistent project dependency merely to run it.
+
+## Expansion rules
+
+Prefer structural evidence before source contents:
+
+- tree and filenames;
+- package/build/test/CI configuration;
+- imports and dependency direction;
 - targeted searches;
-- representative files.
+- representative files;
+- tests expressing intended boundaries.
 
-Do not dump broad directories or large groups of source files into context merely for completeness.
+Do not recursively read the repository for completeness.
 
-Do not recursively read the entire repository merely for completeness.
+Before broadening inspection, identify the unanswered question and read only what can answer it. The goal is to route future work, not memorize the repository.
 
-Start with:
+Treat context consumption as part of audit quality:
 
-1. repository tree;
-2. existing agent/developer documentation;
-3. package/build configuration;
-4. test configuration;
-5. CI configuration where relevant;
-6. obvious application entry points;
-7. obvious architectural directories.
+```text
+structure → hypothesis → targeted evidence → conclusion
+```
 
-Form an initial architecture hypothesis before opening broad source areas.
+not:
 
-Before substantially expanding inspection, identify the specific unanswered question that requires more context.
-
-Do not broaden repository reading without a concrete hypothesis to confirm or reject.
-
-Then inspect only the files necessary to confirm or reject that hypothesis.
-
-Expand into additional source areas only when needed.
-
-Prefer representative files over exhaustive reading.
+```text
+broad reading → accumulated context → conclusion
+```
 
 Do not inspect Git history by default.
 
-Use commits, file-touch frequency, PR history, or blame only when the current working tree cannot answer a relevant audit question, or when testing a specific hypothesis such as repeated churn, ownership ambiguity, or concentrated merge conflicts.
-
-Historical evidence should answer a specific question, not serve as general repository context.
-
-Examples:
-
-- inspect one or two typical components before reading every component;
-- inspect the canonical repository/data layer before every data-access file;
-- inspect architectural imports before reading implementation detail;
-- inspect tests that reveal intended boundaries before broad source exploration.
-
-The goal is to understand the repository sufficiently to route future work, not to memorize the repository.
-
-#### Audit context budget
-
-Treat context consumption as part of the audit's own quality.
-
-A repository audit intended to reduce agent context cost should itself avoid unnecessary context consumption.
-
-Prefer:
-
-structure → hypothesis → targeted evidence → conclusion
-
-over:
-
-broad reading → accumulated context → conclusion
-
 # Audit mode
 
-Audit mode is read-only.
+Audit is read-only.
 
-Do not modify files.
+Inspect enough to understand:
 
-## Inspect
-
-Examine enough of the repository to understand:
-
-- repository structure;
-- existing `AGENTS.md`, `STATE.md`, `ROADMAP.md`, `CONTEXT.md`, or equivalents;
-- README and developer documentation where relevant;
-- package/build configuration;
-- test structure;
-- lint/typecheck/build commands;
-- CI configuration where relevant;
-- architectural/module boundaries;
-- generated files;
-- configuration boundaries;
+- repository structure and entry points;
+- `AGENTS.md`, local `CONTEXT.md`, current-work sources, README;
+- build/package/test/CI configuration;
+- architectural boundaries and dependency direction;
+- generated/configuration files;
 - security-sensitive boundaries;
-- major dependency directions;
-- current-task tracking if present.
+- validation commands.
 
-During audit, identify available validation commands but do not automatically run the complete validation suite.
+Treat vendor-specific instruction files as non-canonical. Do not create, extend, or depend on them. If an existing one materially conflicts with `AGENTS.md`, report the conflict as drift.
 
-Run validation during audit only when:
-
-- the user asks for it;
-- current repository health is relevant to an audit finding;
-- documentation claims cannot otherwise be verified;
-- a lightweight check is needed to establish the baseline.
-
-Full validation is normally required after `adapt` or approved maintenance changes.
+Identify validation commands, but do not run the complete suite automatically. Run checks only when requested, when repository health affects a finding, or when a claim cannot otherwise be verified.
 
 ## Assess
 
-### Navigation
+### Navigation and routing
 
-Can an agent locate the correct subsystem without reading most of the repository?
+Can an agent locate the correct subject without reading most of the repository?
 
-Look for:
+A good root `AGENTS.md` normally contains only:
 
-- meaningful directory structure;
-- clear entry points;
-- naming consistency;
-- routing documentation;
-- obvious subsystem ownership.
+- project identity/purpose;
+- truly global rules;
+- a compact map of major subjects;
+- pointers to what to read next;
+- the authoritative current-work pointer, if one exists;
+- minimal routing/validation guidance.
+
+It should not be a complete architecture manual, README duplicate, historical diary, or giant source-file index.
+
+If the routing table itself becomes large, introduce a dedicated root `CONTEXT.md` router and point to it from `AGENTS.md`.
 
 ### Boundaries
 
-Can the agent understand what different areas own?
-
-Examples:
-
-- UI;
-- domain;
-- data;
-- persistence;
-- API;
-- backend;
-- infrastructure;
-- styles;
-- configuration.
-
-Look for unclear or accidental cross-boundary imports.
+Can the agent explain what each major area owns and what belongs elsewhere? Look for unclear or accidental cross-boundary imports.
 
 ### Current state
 
-Can the next agent determine where active work stopped and what comes next?
-
-Check whether the repository already uses:
-
-- issues;
-- PR descriptions;
-- project boards;
-- task files;
-- planning documents;
-- `STATE.md`;
-- another clear authoritative mechanism.
-
-Do not recommend `STATE.md` merely because this skill knows about `STATE.md`.
+Can the next agent determine what is active and what comes next? Reuse existing issues, PRs, boards, task files, plans, or state files. Do not recommend `STATE.md` by default.
 
 ### Validation
 
-Can an agent determine exactly how correctness is checked?
-
-Identify applicable commands for:
-
-- tests;
-- lint;
-- type checking;
-- architecture checks;
-- build;
-- formatting;
-- migrations where relevant.
-
-Prefer directly executable commands.
+Can an agent determine exactly how to check tests, lint, type checking, build, formatting, architecture rules, and migrations where relevant?
 
 ### Invariants
 
-Identify dangerous or non-obvious rules whose violation could cause subtle bugs.
-
-Examples:
-
-- domain code must remain framework-independent;
-- UI must not access persistence directly;
-- server-only configuration must never reach the client;
-- generated files must not be edited manually;
-- a particular date/serialization pattern must not be used;
-- only approved modules may import a specific dependency.
-
-Determine whether these rules are:
-
-- mechanically enforced;
-- documented;
-- implicit only.
+Identify dangerous non-obvious rules. Determine whether each important invariant is mechanically enforced, documented, or implicit only.
 
 ### Context cost
 
-Ask:
+Ask: how much unrelated context must an agent consume for one safe narrow change?
 
-> How much unrelated context must an agent consume to make one safe narrow change?
+Do not use line count alone. A context hotspot may show:
 
-Do not use line count alone as the decision rule.
+- unrelated features repeatedly touching one file;
+- narrow changes requiring most of a file;
+- concentrated conflicts;
+- multiple independently describable responsibilities;
+- unrelated test setup;
+- ownership that is hard to explain;
+- changes requiring distant code knowledge.
 
-A file becomes a context hotspot when one or more are true:
+### Coupling and duplication
 
-- unrelated features repeatedly modify it;
-- narrow changes require reading most of it;
-- merge conflicts concentrate there;
-- it contains multiple independently describable responsibilities;
-- its tests require unrelated fixtures or setup;
-- its ownership is difficult to explain simply;
-- changes routinely require understanding distant code.
+Look for mixed responsibilities, entry-point hotspots, hidden dependency direction, generic modules accumulating behavior, and duplicate route maps/rules/current state.
 
-A large file may be acceptable.
+Do not recommend refactoring merely because coupling exists. Explain the agent cost and whether a real upcoming change justifies intervention.
 
-A much smaller file may still be agent-hostile.
+### Generated/configuration/security boundaries
 
-### Coupling
+Identify generated files, migrations, environment files, lockfiles, secrets, auth, authorization, persistence boundaries, user-generated content, client/server boundaries, shell execution, and deployment credentials.
 
-Look for:
+Prefer explicit local constraints over generic prose.
 
-- unrelated changes repeatedly touching the same module;
-- feature logic concentrated in application entry points;
-- UI/data/domain responsibilities mixed together;
-- generic modules accumulating unrelated behavior;
-- central files acting
+### Documentation quality
+
+Check whether agent-facing context is current, path-valid, non-duplicative, scoped, actionable, and worth loading. A stale instruction file is worse than no instruction file.
+
+# Audit output
+
+Report before changing anything.
+
+Classify findings:
+
+- `Good` — supports low-context safe work.
+- `Watch` — workable but likely to create context/drift cost.
+- `Problem` — likely to misroute an agent, hide a critical invariant, or force broad reading.
+
+For each meaningful `Watch` or `Problem`, include evidence, agent impact, and the smallest useful correction. End with a prioritized adaptation plan. Do not recommend files merely to fill a template.
+
+# Adapt mode
+
+Apply only an approved audit/plan. Prefer the smallest context system that solves demonstrated problems.
+
+## AGENTS.md
+
+`AGENTS.md` is the canonical entry point. Keep it short and route-first.
+
+A compact table is appropriate for a small number of stable subjects:
+
+```text
+Task / subject    Go to          Read next
+domain behavior   src/domain/    src/domain/CONTEXT.md
+persistence       src/data/      src/data/CONTEXT.md
+UI interaction    src/ui/        src/ui/CONTEXT.md
+deployment        infra/         infra/CONTEXT.md
+```
+
+Route to subjects, not every file. If routing no longer fits comfortably in a small entry file, move detailed routing to root `CONTEXT.md`.
+
+## Local CONTEXT.md
+
+Create one only when a subsystem has enough distinct rules to justify it.
+
+Useful sections:
+
+- Job — what this subject owns.
+- Contents — important concepts/files only.
+- Rules — local invariants.
+- Boundaries — what belongs elsewhere.
+- References — stable detail to load selectively.
+- Verify — checks relevant to this subject.
+
+Prefer pointers over copied explanations.
+
+## Current work
+
+Reuse the existing authoritative system. Create `STATE.md` only when active work otherwise lacks a durable handoff source and the user approves it.
+
+## ROADMAP.md
+
+Do not add by default. Use only when the repository genuinely benefits from a durable phased plan.
+
+## README
+
+Treat README as human-facing onboarding. Do not duplicate the agent routing system into it; link to `AGENTS.md` where useful.
+
+## Mechanical enforcement
+
+When a critical invariant is cheap to enforce, prefer a deterministic check such as an import-boundary rule, architecture test, schema validation, or generated-file check. Do not add a toolchain for a minor convention.
+
+# Maintain mode
+
+Check for:
+
+- broken/deleted paths;
+- routes pointing to moved responsibilities;
+- root context duplicating local context;
+- obsolete current-work state;
+- historical plans mistaken for current requirements;
+- new subjects with no route;
+- changed invariants;
+- new context hotspots;
+- vendor-specific instructions conflicting with `AGENTS.md`;
+- stale Repomix outputs being treated as truth.
+
+Prefer deleting stale context or replacing it with a pointer over adding another layer.
+
+# Refactoring policy
+
+Agentify may recommend code refactoring when repository structure creates substantial agent cost, but never refactor application architecture solely to improve an audit score.
+
+Refactoring may be justified by repeated unrelated churn, unclear ownership causing mis-edits, broad context required for narrow changes, boundaries that cannot be described honestly, or an imminent feature that will worsen a hotspot.
+
+Require human approval.
+
+# Human approval boundaries
+
+Audit is read-only.
+
+Before repository changes, present intended changes unless the user already approved a specific plan.
+
+Never make these incidentally without explicit approval:
+
+- architectural refactors;
+- moving application code across boundaries;
+- deleting historical material;
+- replacing the current-work system;
+- adding persistent dependencies/infrastructure;
+- changing database schemas or deployment behavior;
+- introducing vendor-specific agent configuration.
+
+# Validation after adaptation
+
+Validate in proportion to the change.
+
+Always verify:
+
+- routed paths exist;
+- named commands are real;
+- current-work pointers resolve;
+- generated/historical files are labelled correctly;
+- new context does not duplicate another authoritative source.
+
+If code/configuration/build behavior changed, run relevant lint, typecheck, tests, and build commands.
+
+For documentation-only changes, do not run an expensive full suite merely for ceremony unless requested or required to verify a claim.
+
+Report what was and was not run.
+
+# Success criterion
+
+A repository is sufficiently agent-ready when a capable coding agent can start from a small canonical entry file, follow explicit pointers to the relevant subject, load only local rules and necessary implementation evidence, respect critical invariants, and validate the result without reconstructing the whole repository.
